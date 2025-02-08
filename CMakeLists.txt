@@ -55,11 +55,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # set(CMAKE_CXX_FLAGS_RELEASE "-Wno-deprecated-declarations -O2") # warining: deprecated usage
 endif()
 
-option(CUDA_VERBOSE "Verbose output of CUDA modules" ON)
-
 #========================
 # Dependencies Setup
 #========================
+option(CUDA_VERBOSE "Verbose output of CUDA modules" ON)
 
 # ROS2 #
 find_package(rclcpp REQUIRED)
@@ -188,21 +187,21 @@ link_directories(
 
 # Build non-CUDA bevdet dependent parts
 ament_auto_add_library(bevdet_lib SHARED
-  # confirm to keep
-  src/bevdet/bevdet.cpp   # 包含class bevdet
-
   # unsure to remove
   # src/bevdet/cpu_jpegdecoder.cpp
   # src/bevdet/nvjpegdecoder.cpp
 
   # TODO:remove
-  src/bevdet/data.cpp # include class "DataLoader"，加载数据，cpu/nvjpegdec解码，
+  # src/bevdet/data.cpp # include class "DataLoader"，加载数据，cpu/nvjpegdec解码，
 
   src/test.cpp
 )
 
 # Build CUDA bevdet dependent parts
-# cuda_add_library(bevdet_cuda_lib SHARED
+cuda_add_library(bevdet_cuda_lib SHARED
+  # confirm to keep
+  src/bevdet/bevdet.cpp   # 包含class bevdet
+
 #   src/bevdet/preprocess.cu
 #   ## src/bevdet/bevpool.cu 
 #   src/bevdet/iou3d_nms.cu
@@ -213,7 +212,10 @@ ament_auto_add_library(bevdet_lib SHARED
 #   src/bevdet/bevpool_plugin.cu
 #   src/bevdet/alignbev_plugin.cu
 #   src/bevdet/gatherbev_plugin.cu
-# )
+
+  # TODO:remove
+  src/bevdet/data.cpp
+)
 
 # Build bevdet ros parts
 ament_auto_add_library(bevdet_node SHARED
@@ -222,7 +224,11 @@ ament_auto_add_library(bevdet_node SHARED
 
 target_link_libraries(bevdet_node
   bevdet_lib
-  # bevdet_cuda_lib
+  bevdet_cuda_lib
+
+  # ${CUDA_LIBRARIES}
+  # ${CUDA_CUDA_LIBRARY}
+  # ${CUDA_CUDART_LIBRARY}
   
   yaml-cpp 
   libnvinfer.so

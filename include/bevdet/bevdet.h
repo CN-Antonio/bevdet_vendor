@@ -113,8 +113,7 @@ struct adjFrame{
 class BEVDet{
 public:
     BEVDet(){}
-    BEVDet(const std::string &config_file, int n_img);
-    // ↓原始构造函数
+    // BEVDet(const std::string &config_file, int n_img);
     BEVDet(const std::string &config_file, int n_img,      
                                         std::vector<Eigen::Matrix3f> _cams_intrin, 
                                         std::vector<Eigen::Quaternion<float>> _cams2ego_rot, 
@@ -163,19 +162,22 @@ protected:
     std::string bevstage_file;
 
     std::vector<Box> ego_boxes;
-// pr
-    int N_img;
 
-    int src_img_h;
-    int src_img_w;
-    int input_img_h;
-    int input_img_w;
-    int crop_h;
-    int crop_w;
-    float resize_radio;
-    int down_sample;
-    int feat_h;
+// private:? not now
+    // 相机数量和图像尺寸
+    int N_img;          
+    int src_img_h;      
+    int src_img_w;      
+    int input_img_h;    
+    int input_img_w;    
+    int crop_h;         
+    int crop_w;         
+    float resize_radio; 
+    int down_sample;    
+    int feat_h;         
     int feat_w;
+
+    // BEV参数
     int bev_h;
     int bev_w;
     int bevpool_channel;

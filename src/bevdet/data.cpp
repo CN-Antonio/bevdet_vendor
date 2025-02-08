@@ -24,6 +24,7 @@ camParams::camParams(const YAML::Node &config, int n, std::vector<std::string> &
     ego2global_rot = fromYamlQuater(config["ego2global_rotation"]);
     ego2global_trans = fromYamlTrans(config["ego2global_translation"]);
 
+    // for evaluating outputs, not used in inference
     lidar2ego_rot = fromYamlQuater(config["lidar2ego_rotation"]);
     lidar2ego_trans = fromYamlTrans(config["lidar2ego_translation"]);
 

@@ -2,7 +2,7 @@
 <launch>
   <arg name="ros_param_path"   default="$(find-pkg-share bevdet_vendor)/config/bevdet.param.yaml"/>
   <arg name="data_param_path"  default="$(find-pkg-share bevdet_vendor)/config/bevdet/configure.yaml"/>
-  <arg name="model_param_path" default=""/>
+  <arg name="model_param_path" default="$(find-pkg-share bevdet_vendor)/config/bevdet/cfgs/bevdet.yaml"/>
 
   <arg name="input/cam_front_left" default="/CAM_FRONT_LEFT/image_rect_compressed"/>
   <arg name="input/cam_front" default="/CAM_FRONT/image_rect_compressed"/>
@@ -19,6 +19,7 @@
   <node name="bevdet_node" pkg="bevdet_vendor" exec="bevdet_vendor_node" output="screen" >
     <param from="$(var ros_param_path)" allow_substs="true"/>
     <param from="$(var data_param_path)" allow_substs="true"/>
+    <param from="$(var model_param_path)" allow_substs="true"/>
 
     <remap from="~/input/image_fl" to="$(var input/cam_front_left)"/>
     <remap from="~/input/image_f" to="$(var input/cam_front)"/>

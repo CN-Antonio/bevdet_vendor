@@ -137,6 +137,16 @@ BEVDet_Node::BEVDet_Node(const rclcpp::NodeOptions & node_options):
 
     /* ================ set Data params ================ */
     ROSInitParams();    // replace InitParams(config_file);
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // 初始化视角转换
+    InitViewTransformer();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> t = end - start;
+    RCLCPP_INFO(this->get_logger(), "InitVewTransformer cost time : %.4lf ms\n", t.count() * 1000);
+    // printf("InitVewTransformer cost time : %.4lf ms\n", t.count() * 1000);
+
     return;
     // this->get_parameter("configure", config_file);
     // this->get_parameter("imgstage", imgstage_file);
@@ -206,11 +216,8 @@ BEVDet_Node::~BEVDet_Node(){
 
 void BEVDet_Node::ROSInitParams(void)
 {
-    /* Data */
+    /* Dataset */
     std::string ns = "";
-
-    N_img = declare_parameter<int>("N");
-    
     ns = "cams.";
     const auto cams_name = declare_parameter<std::vector<std::string>>(ns + "cam_name");
 
@@ -230,8 +237,30 @@ void BEVDet_Node::ROSInitParams(void)
         cams2ego_trans[i] = fromVectorTrans(this->declare_parameter<std::vector<double>>(ns + "sensor2ego_translation"));
     }
 
+    /* engine */
+    imgstage_file = declare_parameter<std::string>("ImgStageEngine");
+    bevstage_file = declare_parameter<std::string>("BEVStageEngine");
 
     /* Model */
+    N_img = declare_parameter<int>("N");
+    src_img_h = declare_parameter<int>("H");
+    src_img_w = declare_parameter<int>("W");
+    auto input_img = declare_parameter<std::vector<int>>("data_config.input_size");
+    input_img_h = input_img[0];
+    input_img_w = input_img[1];
+    auto crop = declare_parameter<std::vector<int>>("data_config.crop");
+    crop_h = crop[0];
+    crop_w = crop[1];
+
+    // normalize
+    auto mean_ = declare_parameter<std::vector<float>>("mean");
+    mean.x = mean_[0];
+    mean.y = mean_[1];
+    mean.z = mean_[2];
+
+
+    std::cout<< "pause" <<std::endl;
+
 }
 
 /* Image RGB */
