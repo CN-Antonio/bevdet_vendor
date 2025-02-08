@@ -21,12 +21,14 @@
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
-#include <cv_bridge/cv_bridge.h>
 #include <pcl_conversions/pcl_conversions.h>  // rosmsg2pcl
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h> // sync 6 cam imgs
 #include <message_filters/sync_policies/approximate_time.h> // 时间相近同步
+
+// TODO: remove
+#include <cv_bridge/cv_bridge.h>
 #elif ROS_FOUND
 #endif // ROS/2_FOUND
 

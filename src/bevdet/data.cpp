@@ -242,6 +242,20 @@ Eigen::Matrix3f fromYamlMatrix3f(YAML::Node x){
     return mat;
 }
 
+Eigen::Matrix3f fromVectorMatrix3f(std::vector<double> matrix) {
+    if (matrix.size() != 9) {
+        throw std::invalid_argument("Matrix vector must contain exactly 9 elements for 3x3 matrix");
+    }
+
+    Eigen::Matrix3f mat;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            mat(i, j) = static_cast<float>(matrix[i * 3 + j]);
+        }
+    }
+    return mat;
+}
+
 Eigen::Quaternion<float> fromVectorQuater(std::vector<double> quater) {
     if (quater.size() != 4) {
         throw std::invalid_argument("Quaternion vector must contain exactly 4 elements");

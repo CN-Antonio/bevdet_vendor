@@ -222,10 +222,10 @@ void BEVDet_Node::ROSInitParams(void)
     cams2ego_rot.resize(cams_name.size());
     cams2ego_trans.resize(cams_name.size());
 
+    // TODO: check if params are correct
     for(size_t i = 0; i < cams_name.size(); i++){
         ns = "cams." + cams_name[i] + ".";
-        // cams_intrin[i] = fromYamlMatrix3f(config["cams"][cams_name[i]]["cam_intrinsic"]);
-        // cams_intrin[i] = fromYamlMatrix3f(this->declare_parameter<std::string>(ns + "cam_intrinsic"));
+        cams_intrin[i] = fromVectorMatrix3f(this->declare_parameter<std::vector<double>>(ns + "cam_intrinsic"));
         cams2ego_rot[i] = fromVectorQuater(this->declare_parameter<std::vector<double>>(ns + "sensor2ego_rotation"));
         cams2ego_trans[i] = fromVectorTrans(this->declare_parameter<std::vector<double>>(ns + "sensor2ego_translation"));
     }
