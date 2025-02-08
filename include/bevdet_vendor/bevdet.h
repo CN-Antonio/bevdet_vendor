@@ -4,11 +4,12 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <yaml-cpp/yaml.h> // TODO: remove/replace
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+// TODO: remove/replace
+#include <yaml-cpp/yaml.h> 
 // #include <opencv2/opencv.hpp>
 // #include <opencv2/dnn.hpp>
 
@@ -121,7 +122,7 @@ public:
                                         std::vector<Eigen::Translation3f> _cams2ego_trans,
                                         const std::string &imgstage_file, 
                                         const std::string &bevstage_file);
-    ~BEVDet();    
+    ~BEVDet();
   
     int DoInfer(const camsData &cam_data,  std::vector<Box> &out_detections, float &cost_time,
                                                                                   int idx=-1);
@@ -129,11 +130,12 @@ public:
 
 // config params
 protected:
-    // structure step
+    // TODO: replace with father class function(ROSInitParams)
     void InitParams(const std::string &config_file);
     void InitViewTransformer();
     int InitEngine(const std::string &imgstage_file, const std::string &bevstage_file);
-    int DeserializeTRTEngine(const std::string &engine_file, nvinfer1::ICudaEngine **engine_ptr);
+    int DeserializeTRTEngine(const std::string &engine_file, 
+                             nvinfer1::ICudaEngine **engine_ptr);
     void MallocDeviceMemory();
 
     // DoInfer steps

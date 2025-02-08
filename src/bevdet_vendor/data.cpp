@@ -8,10 +8,6 @@
 #include "data.h"
 #include "cpu_jpegdecoder.h"
 
-#include <opencv2/imgproc/types_c.h>        // cv::COLOR_RGB2BGR
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/opencv.hpp>               //
-
 using std::chrono::high_resolution_clock;
 using std::chrono::duration;
 
@@ -37,7 +33,7 @@ camParams::camParams(const YAML::Node &config, int n, std::vector<std::string> &
     cams2ego_trans.clear();
     
     for(std::string name : cams_name){
-        imgs_file.push_back(config["cams"][name]["data_path"].as<std::string>());
+        imgs_file.push_back("." + config["cams"][name]["data_path"].as<std::string>());
 
         //
         cams_intrin.push_back(fromYamlMatrix3f(config["cams"][name]["cam_intrinsic"]));
@@ -134,50 +130,6 @@ const camsData& DataLoader::data(int idx, bool time_order){
     decode_cpu(imgs_data, imgs_dev, img_w, img_h);
     printf("decode on cpu!\n");
 #endif
-
-    std::string img_name = "./img/"+std::to_string(idx)+".jpg";
-
-    cv::Mat img = cv::Mat::zeros(cv::Size(img_w, img_h * 6), CV_8UC3);
-    cv::Mat img_single;
-    cv::Mat img_temp = cv::Mat::zeros(cv::Size(img_w, img_h), CV_8UC3);
-
-    CHECK_CUDA(cudaMemcpy(img.data, imgs_dev, img_w * (img_h*6) * 3, cudaMemcpyHostToHost));
-    cv::imwrite(img_name, img);
-
-    int channels = img.channels();
-    // cut
-    cv::Mat img_cut;
-    for(int i=0;i<6;i++)
-    {
-        img_cut = img(cv::Rect(0, 0+900*i, 1600, 900));
-        // cv::imwrite(img_name, img_cut);
-        //  CHW(Torch)->HWC(OpenCV)
-        //  CHW: RRRR GGGG BBBB
-        //  HWC: RGB RGB RGB    / BGR BGR BGR
-        //
-        for (int h = 0; h < img_h; ++h){
-            for (int w = 0; w < img_w; ++w){
-                for (int c = 0; c < channels; ++c){
-                    int dstIdx = h * img_w * channels + w * channels + c;
-                    int srcIdx = c * img_h * img_w + h * img_w + w;
-                    img_temp.data[dstIdx] = img_cut.data[srcIdx];
-                }
-            }
-        }
-        // cv::imwrite(img_name, img_temp);
-        
-        // combine
-        if(i==0){
-            img_single = img_temp;
-        }
-        else {
-            cv::vconcat(img_single, img_temp, img_single);
-        }
-
-    }
-
-    cv::imwrite(img_name, img_single);
-
     cams_data.imgs_dev = imgs_dev;
     return cams_data;
 }
@@ -220,7 +172,7 @@ int read_sample(std::vector<std::string> &imgs_file, std::vector<std::vector<cha
     return EXIT_SUCCESS;
 }
 
-// TODO: merge to bevdet_node.cpp
+
 Eigen::Translation3f fromYamlTrans(YAML::Node x){
     std::vector<float> trans = x.as<std::vector<float>>();
     return Eigen::Translation3f(trans[0], trans[1], trans[2]);
@@ -240,26 +192,4 @@ Eigen::Matrix3f fromYamlMatrix3f(YAML::Node x){
         }
     }
     return mat;
-}
-
-Eigen::Quaternion<float> fromVectorQuater(std::vector<double> quater) {
-    if (quater.size() != 4) {
-        throw std::invalid_argument("Quaternion vector must contain exactly 4 elements");
-    }
-    
-    // Convert from double to float and construct quaternion
-    // Order: w, x, y, z (Eigen's default quaternion constructor order)
-    return Eigen::Quaternion<float>(
-        static_cast<float>(quater[0]),  // w
-        static_cast<float>(quater[1]),  // x
-        static_cast<float>(quater[2]),  // y
-        static_cast<float>(quater[3])   // z
-    );
-}
-
-Eigen::Translation3f fromVectorTrans(std::vector<double> trans) {
-    if (trans.size() != 3) {
-        throw std::invalid_argument("Vector must contain 3 elements");
-    }
-    return Eigen::Translation3f(trans[0], trans[1], trans[2]);
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="ros_param_path"   default="$(find-pkg-share bevdet_ros)/config/bevdet.param.yaml"/>
-  <arg name="data_param_path"  default="$(find-pkg-share bevdet_ros)/config/bevdet/configure.yaml"/>
+  <arg name="ros_param_path"   default="$(find-pkg-share bevdet_vendor)/config/bevdet.param.yaml"/>
+  <arg name="data_param_path"  default="$(find-pkg-share bevdet_vendor)/config/bevdet/configure.yaml"/>
   <arg name="model_param_path" default=""/>
 
   <arg name="input/cam_front_left" default="/CAM_FRONT_LEFT/image_rect_compressed"/>
@@ -12,11 +12,11 @@
   <arg name="input/cam_back_right" default="/CAM_BACK_RIGHT/image_rect_compressed"/>
 
   
-  <arg name="imgstage" default="$(find-pkg-share bevdet_ros)/model/img_stage_lt_d_fp16.engine"/>
-  <arg name="bevstage" default="$(find-pkg-share bevdet_ros)/model/bev_stage_lt_d_fp16.engine"/>
+  <arg name="imgstage" default="$(find-pkg-share bevdet_vendor)/model/img_stage_lt_d_fp16.engine"/>
+  <arg name="bevstage" default="$(find-pkg-share bevdet_vendor)/model/bev_stage_lt_d_fp16.engine"/>
     
 
-  <node name="bevdet_node" pkg="bevdet_ros" exec="bevdet_ros_node" output="screen" >
+  <node name="bevdet_node" pkg="bevdet_vendor" exec="bevdet_vendor_node" output="screen" >
     <param from="$(var ros_param_path)" allow_substs="true"/>
     <param from="$(var data_param_path)" allow_substs="true"/>
 

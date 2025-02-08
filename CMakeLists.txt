@@ -192,8 +192,8 @@ ament_auto_add_library(bevdet_lib SHARED
   src/bevdet/bevdet.cpp   # 包含class bevdet
 
   # unsure to remove
-  src/bevdet/cpu_jpegdecoder.cpp
-  src/bevdet/nvjpegdecoder.cpp
+  # src/bevdet/cpu_jpegdecoder.cpp
+  # src/bevdet/nvjpegdecoder.cpp
 
   # TODO:remove
   src/bevdet/data.cpp # include class "DataLoader"，加载数据，cpu/nvjpegdec解码，
@@ -202,18 +202,18 @@ ament_auto_add_library(bevdet_lib SHARED
 )
 
 # Build CUDA bevdet dependent parts
-cuda_add_library(bevdet_cuda_lib SHARED
-  src/bevdet/preprocess.cu 
-  ## src/bevdet/bevpool.cu 
-  src/bevdet/iou3d_nms.cu
-  src/bevdet/postprocess.cu
-  ## src/bevdet/grid_sampler.cu
+# cuda_add_library(bevdet_cuda_lib SHARED
+#   src/bevdet/preprocess.cu
+#   ## src/bevdet/bevpool.cu 
+#   src/bevdet/iou3d_nms.cu
+#   src/bevdet/postprocess.cu
+#   ## src/bevdet/grid_sampler.cu
 
-  src/bevdet/preprocess_plugin.cu
-  src/bevdet/bevpool_plugin.cu
-  src/bevdet/alignbev_plugin.cu
-  src/bevdet/gatherbev_plugin.cu
-)
+#   src/bevdet/preprocess_plugin.cu
+#   src/bevdet/bevpool_plugin.cu
+#   src/bevdet/alignbev_plugin.cu
+#   src/bevdet/gatherbev_plugin.cu
+# )
 
 # Build bevdet ros parts
 ament_auto_add_library(bevdet_node SHARED
@@ -222,7 +222,7 @@ ament_auto_add_library(bevdet_node SHARED
 
 target_link_libraries(bevdet_node
   bevdet_lib
-  bevdet_cuda_lib  
+  # bevdet_cuda_lib
   
   yaml-cpp 
   libnvinfer.so

@@ -9,7 +9,7 @@
 
 #include "bevdet.h"
 
-#include "cpu_jpegdecoder.h"
+// #include "cpu_jpegdecoder.h"
 
 #ifdef ROS2_FOUND
 #include <rclcpp/rclcpp.hpp>
@@ -48,9 +48,9 @@ public:
     void publish_imgs(const std::vector<std::vector<char>> &cam_data);
 protected:
     size_t img_N_;
-    int img_w_; 
+    int img_w_;
     int img_h_;
-    uchar* imgs_dev_ = nullptr; 
+    uchar* imgs_dev_ = nullptr;
 private:
     void ROSInitParams(void);  // get ros params with <declare_parameters>
     // ROS Init
