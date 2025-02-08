@@ -1,0 +1,6 @@
+/**:
+  ros__parameters:
+    base_frame: base_link
+    map_frame: map
+    # data_params:
+    # model_params:

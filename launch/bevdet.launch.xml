@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="ros_param_path"   default="$(find-pkg-share bevdet_ros)/config/bevdet.param.yaml"/>
+  <arg name="data_param_path"  default="$(find-pkg-share bevdet_ros)/config/bevdet/configure.yaml"/>
+  <arg name="model_param_path" default=""/>
+
+  <arg name="input/cam_front_left" default="/CAM_FRONT_LEFT/image_rect_compressed"/>
+  <arg name="input/cam_front" default="/CAM_FRONT/image_rect_compressed"/>
+  <arg name="input/cam_front_right" default="/CAM_FRONT_RIGHT/image_rect_compressed"/>
+  <arg name="input/cam_back_left" default="/CAM_BACK_LEFT/image_rect_compressed"/>
+  <arg name="input/cam_back" default="/CAM_BACK/image_rect_compressed"/>
+  <arg name="input/cam_back_right" default="/CAM_BACK_RIGHT/image_rect_compressed"/>
+
+  
+  <arg name="imgstage" default="$(find-pkg-share bevdet_ros)/model/img_stage_lt_d_fp16.engine"/>
+  <arg name="bevstage" default="$(find-pkg-share bevdet_ros)/model/bev_stage_lt_d_fp16.engine"/>
+    
+
+  <node name="bevdet_node" pkg="bevdet_ros" exec="bevdet_ros_node" output="screen" >
+    <param from="$(var ros_param_path)" allow_substs="true"/>
+    <param from="$(var data_param_path)" allow_substs="true"/>
+
+    <remap from="~/input/image_fl" to="$(var input/cam_front_left)"/>
+    <remap from="~/input/image_f" to="$(var input/cam_front)"/>
+    <remap from="~/input/image_fr" to="$(var input/cam_front_right)"/>
+    <remap from="~/input/image_bl" to="$(var input/cam_back_left)"/>
+    <remap from="~/input/image_b" to="$(var input/cam_back)"/>
+    <remap from="~/input/image_br" to="$(var input/cam_back_right)"/>
+
+    <!-- temp change for vscode debug -->
+    <remap from="/bevdet_node/input/image_fl" to="$(var input/cam_front_left)"/>
+    <remap from="/bevdet_node/input/image_f" to="$(var input/cam_front)"/>
+    <remap from="/bevdet_node/input/image_fr" to="$(var input/cam_front_right)"/>
+    <remap from="/bevdet_node/input/image_bl" to="$(var input/cam_back_left)"/>
+    <remap from="/bevdet_node/input/image_b" to="$(var input/cam_back)"/>
+    <remap from="/bevdet_node/input/image_br" to="$(var input/cam_back_right)"/>
+    <remap from="/bevdet_node/output/markers" to="/markers/infered"/>
+
+    <!-- <param name="configure" value="$(var configure)"/>
+    <param name="imgstage" value="$(var imgstage)"/>
+    <param name="bevstage" value="$(var bevstage)"/> -->
+  </node>
+</launch>

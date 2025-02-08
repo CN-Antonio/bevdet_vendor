@@ -5,6 +5,7 @@
   <description>The bevdet tensorrt package</description>
 
   <maintainer email="cynthia.liu@autocore.ai">cyn-liu</maintainer>
+  <maintainer email="dongyixiao2001@163.com">Dong Yixiao</maintainer>
 
   <license>LCH1238</license>
 
@@ -12,7 +13,17 @@
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
+  <depend>message_filters</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>visualization_msgs</depend>
+
+  <!-- TODO: replace yaml with ros params -->
   <depend>yaml-cpp</depend>
+
+  <depend>cv_bridge</depend> <!-- Temporarily Use -->
+  <depend>pcl_conversions</depend>
+  <depend>pcl_ros</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
