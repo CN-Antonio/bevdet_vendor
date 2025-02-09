@@ -145,8 +145,8 @@ if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL  "aarch64")
   set(TENSORRT_INCLUDE_DIRS /usr/include/aarch64-linux-gnu/)
   set(TENSORRT_LIBRARY_DIRS /usr/lib/aarch64-linux-gnu/)
 elseif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "x86_64")
-  set(TENSORRT_INCLUDE_DIRS /home/antonio/Downloads/TensorRT-8.5.3.1/include)
-  set(TENSORRT_LIBRARY_DIRS /home/antonio/Downloads/TensorRT-8.5.3.1/lib)
+  set(TENSORRT_INCLUDE_DIRS /root/TensorRT-8.5.2.2/include)  # your tensorrt path
+  set(TENSORRT_LIBRARY_DIRS /root/TensorRT-8.5.2.2/lib)
 endif()
 
 # set flags for CUDNN availability

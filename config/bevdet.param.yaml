@@ -1,3 +1,5 @@
+# This includes params for ROS
+
 /**:
   ros__parameters:
     base_frame: base_link

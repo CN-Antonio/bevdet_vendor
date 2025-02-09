@@ -386,10 +386,9 @@ int BEVDet::DeserializeTRTEngine(const std::string &engine_file, nvinfer1::ICuda
     file.close();
 
     nvinfer1::IRuntime* runtime = nvinfer1::createInferRuntime(g_logger);
-    if (runtime == nullptr) 
-    {
-        // std::string msg("Failed to build runtime parser!");
-        // g_logger.log(nvinfer1::ILogger::Severity::kERROR, msg.c_str());
+    if (runtime == nullptr) {
+        std::string msg("Failed to build runtime parser!");
+        g_logger.log(nvinfer1::ILogger::Severity::kERROR, msg.c_str());
         return EXIT_FAILURE;
     }
     engine_stream.seekg(0, std::ios::end);
@@ -398,14 +397,11 @@ int BEVDet::DeserializeTRTEngine(const std::string &engine_file, nvinfer1::ICuda
     engine_stream.seekg(0, std::ios::beg); 
     void* engine_str = malloc(engine_size);
     engine_stream.read((char*)engine_str, engine_size);
-    
-    nvinfer1::ICudaEngine *engine = runtime->deserializeCudaEngine(engine_str, engine_size, NULL);
-    if (engine == nullptr)
-    {
-        // std::string msg("Failed to build engine parser!");
-        // g_logger.log(nvinfer1::ILogger::Severity::kERROR, msg.c_str());
-        std::cout << "\033[1;31m" << "\nFailed to build engine parser!\n" << "\033[0m" << std::endl;
 
+    nvinfer1::ICudaEngine *engine = runtime->deserializeCudaEngine(engine_str, engine_size, NULL);
+    if (engine == nullptr) {
+        std::string msg("Failed to build engine parser!");
+        g_logger.log(nvinfer1::ILogger::Severity::kERROR, msg.c_str());
         return EXIT_FAILURE;
     }
     *engine_ptr = engine;

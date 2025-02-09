@@ -138,14 +138,18 @@ BEVDet_Node::BEVDet_Node(const rclcpp::NodeOptions & node_options):
     /* ================ set Data params ================ */
     ROSInitParams();    // replace InitParams(config_file);
 
-    auto start = std::chrono::high_resolution_clock::now();
 
+    /* TODO: init TRT engine be applied in BEVDet::InitBEVDet()*/
     // 初始化视角转换
+    auto start = std::chrono::high_resolution_clock::now();
     InitViewTransformer();
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> t = end - start;
     RCLCPP_INFO(this->get_logger(), "InitVewTransformer cost time : %.4lf ms\n", t.count() * 1000);
-    // printf("InitVewTransformer cost time : %.4lf ms\n", t.count() * 1000);
+
+    InitEngine(imgstage_file, bevstage_file); // FIXME
+    MallocDeviceMemory();
+    // 以上为bevdet构造函数内容
 
     return;
     // this->get_parameter("configure", config_file);
@@ -257,9 +261,92 @@ void BEVDet_Node::ROSInitParams(void)
     mean.x = mean_[0];
     mean.y = mean_[1];
     mean.z = mean_[2];
+    auto std_ = declare_parameter<std::vector<float>>("std");
+    std.x = std_[0];
+    std.y = std_[1];
+    std.z = std_[2];
+    
+    auto grid_config_depth = declare_parameter<std::vector<float>>("grid_config.depth");
+    depth_start = grid_config_depth[0];
+    depth_end =   grid_config_depth[1];
+    depth_step =  grid_config_depth[2];
+    auto grid_config_x = declare_parameter<std::vector<float>>("grid_config.x");
+    x_start = grid_config_x[0];
+    x_end =   grid_config_x[1];
+    x_step =  grid_config_x[2];
+    auto grid_config_y = declare_parameter<std::vector<float>>("grid_config.y");
+    y_start = grid_config_y[0];
+    y_end =   grid_config_y[1];
+    y_step =  grid_config_y[2];
+    auto grid_config_z = declare_parameter<std::vector<float>>("grid_config.z");
+    z_start = grid_config_z[0];
+    z_end =   grid_config_z[1];
+    z_step =  grid_config_z[2];
+
+    down_sample = declare_parameter<int>("model.down_sample");
+    bevpool_channel = declare_parameter<int>("model.bevpool_channels");
+
+    nms_pre_maxnum = declare_parameter<int>("test_cfg.max_per_img");
+    nms_post_maxnum = declare_parameter<int>("test_cfg.post_max_size");
+    score_thresh = declare_parameter<float>("test_cfg.score_threshold");
+    nms_overlap_thresh = declare_parameter<std::vector<float>>("test_cfg.nms_thr")[0];  // ?
+
+    use_depth = declare_parameter<bool>("use_depth");
+    use_adj = declare_parameter<bool>("use_adj");
+    if(declare_parameter<std::string>("sampling") == "bicubic"){
+        pre_sample = Sampler::bicubic;
+    } else {
+        pre_sample = Sampler::nearest;
+    }
+
+    auto nms_factor_temp = declare_parameter<std::vector<float>>(
+        "test_cfg.nms_rescale_factor");
+    nms_rescale_factor.clear();
+    for(const auto& factor : nms_factor_temp) {
+        nms_rescale_factor.push_back(static_cast<float>(factor));
+    }
+    // for(auto task_factors : nms_factor_temp){
+    //     for(float factor : task_factors){
+    //         nms_rescale_factor.push_back(factor);
+    //     }
+    // }
+
+    auto common_head_channel = declare_parameter<std::vector<int>>("model.common_head.channels");
+    auto common_head_name = declare_parameter<std::vector<std::string>>("model.common_head.names");
+    for(size_t i = 0; i< common_head_channel.size(); i++){
+        out_num_task_head[common_head_name[i]] = common_head_channel[i];
+    }
+
+    // DONE: Calculate some params
+    resize_radio = (float)input_img_w / src_img_w;
+    feat_h = input_img_h / down_sample;
+    feat_w = input_img_w / down_sample;
+    depth_num = (depth_end - depth_start) / depth_step;
+    xgrid_num = (x_end - x_start) / x_step;
+    ygrid_num = (y_end - y_start) / y_step;
+    zgrid_num = (z_end - z_start) / z_step;
+    bev_h = ygrid_num;
+    bev_w = xgrid_num;
 
 
-    std::cout<< "pause" <<std::endl;
+    post_rot << resize_radio, 0, 0,
+                0, resize_radio, 0,
+                0, 0, 1;
+    post_trans.translation() << -crop_w, -crop_h, 0;
+
+    adj_num = 0;
+    if(use_adj){
+        adj_num = declare_parameter<int>("adj_num");
+        adj_frame_ptr.reset(new adjFrame(adj_num, bev_h * bev_w, bevpool_channel));
+    }
+
+
+    // postprocess_ptr.reset(new PostprocessGPU(class_num, score_thresh, nms_overlap_thresh,
+    //                                         nms_pre_maxnum, nms_post_maxnum, down_sample,
+    //                                         bev_h, bev_w, x_step, y_step, x_start,
+    //                                         y_start, class_num_pre_task, nms_rescale_factor));
+
+    std::cout<< "Init Params Finished" <<std::endl;
 
 }
 
