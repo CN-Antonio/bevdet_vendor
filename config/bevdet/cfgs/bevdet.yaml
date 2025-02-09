@@ -36,21 +36,28 @@
     #         post_center_range: [-61.2, -61.2, -10.0, 61.2, 61.2, 10.0]
     #         score_threshold: 0.1
       common_head:
-          channels: [2, 1, 3, 2, 2]
-          names: [reg, height, dim, rot, vel]
-    #     tasks:
-    #     -   class_names: [car]
-    #         num_class: 1
-    #     -   class_names: [truck, construction_vehicle]
-    #         num_class: 2
-    #     -   class_names: [bus, trailer]
-    #         num_class: 2
-    #     -   class_names: [barrier]
-    #         num_class: 1
-    #     -   class_names: [motorcycle, bicycle]
-    #         num_class: 2
-    #     -   class_names: [pedestrian, traffic_cone]
-    #         num_class: 2
+        channels: [2, 1, 3, 2, 2]
+        names: [reg, height, dim, rot, vel]
+        tasks:
+          count: 6
+          0:
+            class_names: [car]
+            num_class: 1
+          1:
+            class_names: [truck, construction_vehicle]
+            num_class: 2
+          2:
+            class_names: [bus, trailer]
+            num_class: 2
+          3:
+            class_names: [barrier]
+            num_class: 1
+          4:
+            class_names: [motorcycle, bicycle]
+            num_class: 2
+          5:
+            class_names: [pedestrian, traffic_cone]
+            num_class: 2
     test_cfg:
       max_per_img: 500
   #     max_pool_nms: false

@@ -311,6 +311,21 @@ void BEVDet_Node::ROSInitParams(void)
     //     }
     // }
 
+    // for post process
+    std::vector<std::vector<std::string>> class_name_pre_task; //unknow usage
+    class_num = 0;
+    class_num_pre_task = std::vector<int>();
+    int task_count = declare_parameter<int>("model.common_head.tasks.count", 6);
+    for (int i = 0; i < task_count; i++) {
+        std::string task_prefix = "model.common_head.tasks." + std::to_string(i) + ".";
+        
+        auto task_classes = declare_parameter<std::vector<std::string>>(task_prefix + "class_names", std::vector<std::string>{});
+        int num = declare_parameter<int>(task_prefix + "num_class", 0);
+        class_num_pre_task.push_back(num);
+        class_num += num;
+        class_name_pre_task.push_back(task_classes);
+    }
+
     auto common_head_channel = declare_parameter<std::vector<int>>("model.common_head.channels");
     auto common_head_name = declare_parameter<std::vector<std::string>>("model.common_head.names");
     for(size_t i = 0; i< common_head_channel.size(); i++){
@@ -341,10 +356,10 @@ void BEVDet_Node::ROSInitParams(void)
     }
 
 
-    // postprocess_ptr.reset(new PostprocessGPU(class_num, score_thresh, nms_overlap_thresh,
-    //                                         nms_pre_maxnum, nms_post_maxnum, down_sample,
-    //                                         bev_h, bev_w, x_step, y_step, x_start,
-    //                                         y_start, class_num_pre_task, nms_rescale_factor));
+    postprocess_ptr.reset(new PostprocessGPU(class_num, score_thresh, nms_overlap_thresh,
+                                            nms_pre_maxnum, nms_post_maxnum, down_sample,
+                                            bev_h, bev_w, x_step, y_step, x_start, y_start,
+                                            class_num_pre_task, nms_rescale_factor));
 
     std::cout<< "Init Params Finished" <<std::endl;
 

@@ -204,8 +204,8 @@ cuda_add_library(bevdet_cuda_lib SHARED
 
 #   src/bevdet/preprocess.cu
 #   ## src/bevdet/bevpool.cu 
-#   src/bevdet/iou3d_nms.cu
-#   src/bevdet/postprocess.cu
+  src/bevdet/iou3d_nms.cu
+  src/bevdet/postprocess.cu
 #   ## src/bevdet/grid_sampler.cu
 
 #   src/bevdet/preprocess_plugin.cu
