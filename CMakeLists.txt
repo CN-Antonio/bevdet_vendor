@@ -202,11 +202,11 @@ cuda_add_library(bevdet_cuda_lib SHARED
   # confirm to keep
   src/bevdet/bevdet.cpp   # 包含class bevdet
 
-#   src/bevdet/preprocess.cu
-#   ## src/bevdet/bevpool.cu 
+  src/bevdet/preprocess.cu
+  src/bevdet/bevpool.cu 
   src/bevdet/iou3d_nms.cu
   src/bevdet/postprocess.cu
-#   ## src/bevdet/grid_sampler.cu
+  src/bevdet/grid_sampler.cu
 
 #   src/bevdet/preprocess_plugin.cu
 #   src/bevdet/bevpool_plugin.cu

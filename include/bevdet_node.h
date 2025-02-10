@@ -49,9 +49,6 @@ public:
     void TestNuscenes(YAML::Node &config);
     void publish_imgs(const std::vector<std::vector<char>> &cam_data);
 protected:
-    size_t img_N_;
-    int img_w_;
-    int img_h_;
     uchar* imgs_dev_ = nullptr;
 private:
     void ROSInitParams(void);  // get ros params with <declare_parameters>

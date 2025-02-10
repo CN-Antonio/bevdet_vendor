@@ -94,19 +94,19 @@ BEVDet_Node::BEVDet_Node(const rclcpp::NodeOptions & node_options):
 
     // ==================  Set subscribers and publishers ========================= //
     sub_cloud_top_.subscribe(this, "/LIDAR_TOP",  rclcpp::QoS{1}.get_rmw_qos_profile());
-    // sub_img_fl_.subscribe(this, "~/input/image_fl", rclcpp::QoS{1}.get_rmw_qos_profile());
-    // sub_img_f_.subscribe(this, "~/input/image_f", rclcpp::QoS{1}.get_rmw_qos_profile());
-    // sub_img_fr_.subscribe(this, "~/input/image_fr", rclcpp::QoS{1}.get_rmw_qos_profile());
-    // sub_img_bl_.subscribe(this, "~/input/image_bl", rclcpp::QoS{1}.get_rmw_qos_profile());
-    // sub_img_b_.subscribe(this, "~/input/image_b", rclcpp::QoS{1}.get_rmw_qos_profile());
-    // sub_img_br_.subscribe(this, "~/input/image_br", rclcpp::QoS{1}.get_rmw_qos_profile());
+    sub_img_fl_.subscribe(this, "~/input/image_fl", rclcpp::QoS{1}.get_rmw_qos_profile());
+    sub_img_f_.subscribe(this, "~/input/image_f", rclcpp::QoS{1}.get_rmw_qos_profile());
+    sub_img_fr_.subscribe(this, "~/input/image_fr", rclcpp::QoS{1}.get_rmw_qos_profile());
+    sub_img_bl_.subscribe(this, "~/input/image_bl", rclcpp::QoS{1}.get_rmw_qos_profile());
+    sub_img_b_.subscribe(this, "~/input/image_b", rclcpp::QoS{1}.get_rmw_qos_profile());
+    sub_img_br_.subscribe(this, "~/input/image_br", rclcpp::QoS{1}.get_rmw_qos_profile());
 // CompressedImage
-    sub_cpimg_fl_.subscribe(this, "~/input/image_fl", rclcpp::QoS{1}.get_rmw_qos_profile());
-    sub_cpimg_f_.subscribe(this, "~/input/image_f", rclcpp::QoS{1}.get_rmw_qos_profile());
-    sub_cpimg_fr_.subscribe(this, "~/input/image_fr", rclcpp::QoS{1}.get_rmw_qos_profile());
-    sub_cpimg_bl_.subscribe(this, "~/input/image_bl", rclcpp::QoS{1}.get_rmw_qos_profile());
-    sub_cpimg_b_.subscribe(this, "~/input/image_b", rclcpp::QoS{1}.get_rmw_qos_profile());
-    sub_cpimg_br_.subscribe(this, "~/input/image_br", rclcpp::QoS{1}.get_rmw_qos_profile());
+    // sub_cpimg_fl_.subscribe(this, "~/input/image_fl", rclcpp::QoS{1}.get_rmw_qos_profile());
+    // sub_cpimg_f_.subscribe(this, "~/input/image_f", rclcpp::QoS{1}.get_rmw_qos_profile());
+    // sub_cpimg_fr_.subscribe(this, "~/input/image_fr", rclcpp::QoS{1}.get_rmw_qos_profile());
+    // sub_cpimg_bl_.subscribe(this, "~/input/image_bl", rclcpp::QoS{1}.get_rmw_qos_profile());
+    // sub_cpimg_b_.subscribe(this, "~/input/image_b", rclcpp::QoS{1}.get_rmw_qos_profile());
+    // sub_cpimg_br_.subscribe(this, "~/input/image_br", rclcpp::QoS{1}.get_rmw_qos_profile());
 
     sync_queue_size_ = declare_parameter<int>("sync_queue_size", 60);   // 10 for each img
     // Create publishers and subscribers
@@ -115,18 +115,18 @@ BEVDet_Node::BEVDet_Node(const rclcpp::NodeOptions & node_options):
     using std::placeholders::_5;using std::placeholders::_6;
     // using std::placeholders::_7;
 // IF RGB Img
-    // sync_ptr_ = std::make_shared<Sync>(SyncPolicy(sync_queue_size_),
-    //     // sub_cloud_top_,
-    //     sub_img_fl_, sub_img_f_, sub_img_fr_,
-    //     sub_img_b_, sub_img_bl_, sub_img_br_);
-    // sync_ptr_->registerCallback(
-    //     std::bind(&BEVDet_Node::callback, this, _1, _2, _3, _4, _5, _6));
+    sync_ptr_ = std::make_shared<Sync>(SyncPolicy(sync_queue_size_),
+        // sub_cloud_top_,
+        sub_img_fl_, sub_img_f_, sub_img_fr_,
+        sub_img_b_, sub_img_bl_, sub_img_br_);
+    sync_ptr_->registerCallback(
+        std::bind(&BEVDet_Node::callback, this, _1, _2, _3, _4, _5, _6));
 // IF Compressed Img
-    sync_cp_ptr_ = std::make_shared<SyncCp>(SyncCpPolicy(sync_queue_size_),
-        sub_cpimg_fl_, sub_cpimg_f_, sub_cpimg_fr_,
-        sub_cpimg_b_, sub_cpimg_bl_, sub_cpimg_br_);
-    sync_cp_ptr_->registerCallback(
-        std::bind(&BEVDet_Node::callbackCompressed, this, _1, _2, _3, _4, _5, _6));
+    // sync_cp_ptr_ = std::make_shared<SyncCp>(SyncCpPolicy(sync_queue_size_),
+    //     sub_cpimg_fl_, sub_cpimg_f_, sub_cpimg_fr_,
+    //     sub_cpimg_b_, sub_cpimg_bl_, sub_cpimg_br_);
+    // sync_cp_ptr_->registerCallback(
+    //     std::bind(&BEVDet_Node::callbackCompressed, this, _1, _2, _3, _4, _5, _6));
 
     pub_stitched_img = create_publisher<sensor_msgs::msg::Image>(
         "/output/object", rclcpp::QoS{1});
@@ -149,64 +149,10 @@ BEVDet_Node::BEVDet_Node(const rclcpp::NodeOptions & node_options):
 
     InitEngine(imgstage_file, bevstage_file); // FIXME
     MallocDeviceMemory();
-    // 以上为bevdet构造函数内容
+    // 以上为bevdet原构造函数内容
 
-    return;
-    // this->get_parameter("configure", config_file);
-    // this->get_parameter("imgstage", imgstage_file);
-    // this->get_parameter("bevstage", bevstage_file);
-    // RCLCPP_INFO(this->get_logger(), "config_filePath: %s", config_file.c_str());
-
-    // TODO BEGIN: read from yaml file
-    // YAML::Node config = YAML::LoadFile(config_file);
-
-    // std::vector<std::string> cams_name = config["cams"]["cam_name"].as<std::vector<std::string>>();
-
-    // cams_intrin.clear();
-    // cams2ego_rot.clear();
-    // cams2ego_trans.clear();
-
-    // cams_intrin.resize(cams_name.size());
-    // cams2ego_rot.resize(cams_name.size());
-    // cams2ego_trans.resize(cams_name.size());
-
-    // for(size_t i = 0; i < cams_name.size(); i++){
-    //     cams_intrin[i] = fromYamlMatrix3f(config["cams"][cams_name[i]]["cam_intrinsic"]);
-    //     cams2ego_rot[i] = fromYamlQuater(config["cams"][cams_name[i]]["sensor2ego_rotation"]);//nuscenes.get_cams2ego_rot();
-    //     cams2ego_trans[i] = fromYamlTrans(config["cams"][cams_name[i]]["sensor2ego_translation"]);//nuscenes.get_cams2ego_trans();
-    // }
-
-    /* Set model params */
-    // imgstage_file = config["ImgStageEngine"].as<std::string>();
-    // bevstage_file = config["BEVStageEngine"].as<std::string>();
-
-    /* =============  bevdet_lt_depth.yaml ================== */
-    // config_file = config["ModelConfig"].as<std::string>();
-    // this->get_parameter("model", config_file);
-    InitParams(config_file);
-
-    auto start = std::chrono::high_resolution_clock::now();
-
-    /* TODO: init TRT engine be applied in BEVDet::InitBEVDet()*/
-    // 初始化视角转换
-    InitViewTransformer();
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float> t = end - start;
-    printf("InitVewTransformer cost time : %.4lf ms\n", t.count() * 1000);
-
-    // 初始化推理引擎
-    InitEngine(imgstage_file, bevstage_file); // FIXME
-    MallocDeviceMemory();
-
-    // temporarily for jpeg decode
-    // TODO: remove
-    img_N_ = 6;  // 图片数量 6
-    img_w_ = 1600;        // W: 1600
-    img_h_ = 900;        // H: 900
     // gpu分配内参， cuda上分配6张图的大小 每个变量sizeof(uchar)个字节，并用imgs_dev指向该gpu上内存, sizeof(uchar) =1
-    CHECK_CUDA(cudaMalloc((void**)&imgs_dev_, img_N_ * 3 * img_w_ * img_h_ * sizeof(uchar)));
-
-
+    CHECK_CUDA(cudaMalloc((void**)&imgs_dev_, N_img * 3 * src_img_w * src_img_h * sizeof(uchar)));
 
     // test
     // timer_ = this->create_wall_timer(
@@ -377,37 +323,64 @@ void BEVDet_Node::callback(
 {
     RCLCPP_INFO(rclcpp::get_logger("bevdet_node"), "new Img callback");
 
-    cv::Mat img_fl, img_f, img_fr, img_bl, img_b, img_br;
     std::vector<cv::Mat> imgs;
+    imgs.reserve(6); // Pre-allocate space for 6 images
 
-    img_fl = cv_bridge::toCvShare(img_fl_msg , "bgr8")->image;
-    img_f  = cv_bridge::toCvShare(img_f_msg, "bgr8")->image;
-    img_fr = cv_bridge::toCvShare(img_fr_msg, "bgr8")->image;
-    img_bl = cv_bridge::toCvShare(img_bl_msg , "bgr8")->image;
-    img_b  = cv_bridge::toCvShare(img_b_msg, "bgr8")->image;
-    img_br = cv_bridge::toCvShare(img_br_msg, "bgr8")->image;
-
-    imgs.emplace_back(img_fl);
-    imgs.emplace_back(img_f);
-    imgs.emplace_back(img_fr);
-    imgs.emplace_back(img_bl);
-    imgs.emplace_back(img_b);
-    imgs.emplace_back(img_br);
-
-    return;
-
-    size_t width = 1600;
-    size_t height = 900;
-    uchar* temp_gpu = nullptr;
-    CHECK_CUDA(cudaMalloc(&temp_gpu, width * height * 3));
-    for (size_t i = 0; i < imgs.size(); i++) {
-        CHECK_CUDA(cudaMemcpy(temp_gpu, imgs[i].data, width * height * 3, cudaMemcpyHostToDevice));
-        convert_RGBHWC_to_BGRCHW(temp_gpu, imgs_dev_ + i * width * height * 3, 3, height, width);
-        CHECK_CUDA(cudaDeviceSynchronize());
+    // Convert ROS messages to OpenCV images
+    try {
+        imgs.emplace_back(cv_bridge::toCvShare(img_fl_msg, "bgr8")->image);
+        imgs.emplace_back(cv_bridge::toCvShare(img_f_msg, "bgr8")->image);
+        imgs.emplace_back(cv_bridge::toCvShare(img_fr_msg, "bgr8")->image);
+        imgs.emplace_back(cv_bridge::toCvShare(img_bl_msg, "bgr8")->image);
+        imgs.emplace_back(cv_bridge::toCvShare(img_b_msg, "bgr8")->image);
+        imgs.emplace_back(cv_bridge::toCvShare(img_br_msg, "bgr8")->image);
+    } catch (cv_bridge::Exception& e) {
+        RCLCPP_ERROR(this->get_logger(), "cv_bridge exception: %s", e.what());
+        return;
     }
-    CHECK_CUDA(cudaFree(temp_gpu));
 
-    DoInfer(imgs_dev_);
+    // Verify image dimensions
+    for (const auto& img : imgs) {
+        if (img.empty() || img.cols != src_img_w || img.rows != src_img_h) {
+            RCLCPP_ERROR(this->get_logger(), "Invalid image dimensions");
+            return;
+        }
+    }
+
+    // Process images on GPU
+    uchar* temp_gpu = nullptr;
+    try {
+        CHECK_CUDA(cudaMalloc(&temp_gpu, src_img_w * src_img_h * 3));
+        
+        for (size_t i = 0; i < imgs.size(); i++) {
+            if (!imgs[i].isContinuous()) {
+                imgs[i] = imgs[i].clone();
+            }
+            CHECK_CUDA(cudaMemcpy(temp_gpu, imgs[i].data, src_img_w * src_img_h * 3, cudaMemcpyHostToDevice));
+            convert_RGBHWC_to_BGRCHW(temp_gpu, imgs_dev_ + i * src_img_w * src_img_h * 3, 3, src_img_h, src_img_w);
+            CHECK_CUDA(cudaDeviceSynchronize());
+        }
+    } catch (const std::runtime_error& e) {
+        RCLCPP_ERROR(this->get_logger(), "CUDA error: %s", e.what());
+        if (temp_gpu) {
+            cudaFree(temp_gpu);
+        }
+        return;
+    }
+
+    // Clean up temporary GPU memory
+    if (temp_gpu) {
+        CHECK_CUDA(cudaFree(temp_gpu));
+    }
+
+    // Process the images
+    try {
+        DoInfer(imgs_dev_);
+        // publish_boxes(this->markers, ego_boxes);
+    } catch (const std::exception& e) {
+        RCLCPP_ERROR(this->get_logger(), "Inference error: %s", e.what());
+        return;
+    }
 
     //publish
     publish_boxes(this->markers, ego_boxes);

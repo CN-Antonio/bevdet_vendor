@@ -382,15 +382,14 @@ int BEVDet::DeserializeTRTEngine(const std::string &engine_file, nvinfer1::ICuda
     engine_stream.seekg(0, engine_stream.beg);
 
     std::ifstream file(engine_file);
-    engine_stream << file.rdbuf();
-    file.close();
-
-    nvinfer1::IRuntime* runtime = nvinfer1::createInferRuntime(g_logger);
-    if (runtime == nullptr) {
-        std::string msg("Failed to build runtime parser!");
+    if (!file.good()) {
+        std::string msg("Failed to open engine file: " + engine_file);
         g_logger.log(nvinfer1::ILogger::Severity::kERROR, msg.c_str());
         return EXIT_FAILURE;
     }
+    engine_stream << file.rdbuf();
+    file.close();
+
     engine_stream.seekg(0, std::ios::end);
     const int engine_size = engine_stream.tellg();
 
@@ -398,6 +397,12 @@ int BEVDet::DeserializeTRTEngine(const std::string &engine_file, nvinfer1::ICuda
     void* engine_str = malloc(engine_size);
     engine_stream.read((char*)engine_str, engine_size);
 
+    nvinfer1::IRuntime* runtime = nvinfer1::createInferRuntime(g_logger);
+    if (runtime == nullptr) {
+        std::string msg("Failed to build runtime parser!");
+        g_logger.log(nvinfer1::ILogger::Severity::kERROR, msg.c_str());
+        return EXIT_FAILURE;
+    }
     nvinfer1::ICudaEngine *engine = runtime->deserializeCudaEngine(engine_str, engine_size, NULL);
     if (engine == nullptr) {
         std::string msg("Failed to build engine parser!");
@@ -740,11 +745,10 @@ int BEVDet::DoInfer(const uchar *img_data)
     CHECK_CUDA(cudaDeviceSynchronize());
     auto bevpool_end = high_resolution_clock::now();
 
-    // [STEP 4] TODO: align BEV feature
-    if(1/*use_adj*/){
-        // GetAdjFrameFeature(cam_data.param.scene_token, cam_data.param.ego2global_rot, 
-        //                 cam_data.param.ego2global_trans, (float*)bevstage_buffer[bevbuffer_map["BEV_feat"]]);
-        // CHECK_CUDA(cudaDeviceSynchronize());
+    // [STEP 4] align BEV feature
+    if(use_adj){
+        GetAdjFrameFeature((float*)bevstage_buffer[bevbuffer_map["BEV_feat"]]);
+        CHECK_CUDA(cudaDeviceSynchronize());
     }
     auto align_feat_end = high_resolution_clock::now();
 
@@ -768,17 +772,27 @@ int BEVDet::DoInfer(const uchar *img_data)
     duration<double> imgstage_t = imgstage_end - pre_end;
     duration<double> bevpool_t = bevpool_end - imgstage_end;
     duration<double> align_t = duration<double>(0);
+    duration<double> bevstage_t;
+    if(use_adj){
+        align_t = align_feat_end - bevpool_end;
+        bevstage_t = bevstage_end - align_feat_end;
+    }
+    else{
+        bevstage_t = bevstage_end - bevpool_end;
+    }
+    duration<double> post_t = post_end - bevstage_end;
 
     printf("[Preprocess   ] cost time: %5.3lf ms\n", pre_t.count() * 1000);
     printf("[Image stage  ] cost time: %5.3lf ms\n", imgstage_t.count() * 1000);
     printf("[BEV pool     ] cost time: %5.3lf ms\n", bevpool_t.count() * 1000);
-
-    // printf("[BEV stage    ] cost time: %5.3lf ms\n", bevstage_t.count() * 1000);
-    // printf("[Postprocess  ] cost time: %5.3lf ms\n", post_t.count() * 1000);
+    if(use_adj){
+        printf("[Align Feature] cost time: %5.3lf ms\n", align_t.count() * 1000);
+    }
+    printf("[BEV stage    ] cost time: %5.3lf ms\n", bevstage_t.count() * 1000);
+    printf("[Postprocess  ] cost time: %5.3lf ms\n", post_t.count() * 1000);
 
     duration<double> sum_time = post_end - pre_start;
-    // cost_time = sum_time.count() * 1000;
-    // printf("[Infer total  ] cost time: %5.3lf ms\n", cost_time);
+    printf("[Infer total  ] cost time: %5.3lf ms\n", sum_time.count() * 1000);
 
     printf("Detect %ld objects\n", ego_boxes.size());
 

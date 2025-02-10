@@ -1,5 +1,5 @@
 # 参数，不是配置
-# bevdet_lt_depth.yaml
+# modified from bevdet_lt_depth.yaml
 
 /**:
   ros__parameters:
@@ -7,7 +7,7 @@
     mean: [123.675, 116.28, 103.53]
     std: [58.395, 57.12, 57.375]
     use_depth: true #false
-    use_adj: true
+    use_adj: false
     adj_num: 8
     sampling: nearest # nearest # or bicubic
 #####
