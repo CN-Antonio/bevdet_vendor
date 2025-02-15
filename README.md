@@ -1,5 +1,9 @@
 # BEVDet implemented by TensorRT, C++
 
+## Attention
+
+This repo is deprecated, go to [bevdet_ros](https://github.com/CN-Antonio/bevdet_ros) for the latest update.
+
 <div align="center">
 
 English | [简体中文](doc/README_zh-CN.md)

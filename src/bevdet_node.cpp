@@ -36,6 +36,7 @@ std_msgs::msg::ColorRGBA make_color(int label)
 //     {1.0, 0.38, 0.27, 0.5}
 // };
 
+// TODO: insert into BEVDet_Node
 void publish_boxes(rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr publisher, std::vector<Box> boxes)
 {
     std::cout<< "len: "<< boxes.size()<< std::endl;
@@ -45,7 +46,7 @@ void publish_boxes(rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::Shar
     visualization_msgs::msg::MarkerArray box_array;
 
     // Set new
-    box_marker.header.frame_id = "hero";
+    box_marker.header.frame_id = "base_link";
     box_marker.type = visualization_msgs::msg::Marker::CUBE;  // 1
     box_marker.action = visualization_msgs::msg::Marker::ADD; // 0
     box_marker.scale.x = 2.0;
@@ -376,14 +377,14 @@ void BEVDet_Node::callback(
     // Process the images
     try {
         DoInfer(imgs_dev_);
-        // publish_boxes(this->markers, ego_boxes);
+
+        // publish
+        publish_boxes(this->markers, ego_boxes);
     } catch (const std::exception& e) {
         RCLCPP_ERROR(this->get_logger(), "Inference error: %s", e.what());
         return;
     }
 
-    //publish
-    publish_boxes(this->markers, ego_boxes);
 }
 
 void BEVDet_Node::callbackCompressed(
